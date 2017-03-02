@@ -1,4 +1,4 @@
-package org.usfirst.frc.team3407.ems;
+package org.usfirst.frc.team3407.ems.simulator;
 
 import java.nio.ByteBuffer;
 import java.util.Random;

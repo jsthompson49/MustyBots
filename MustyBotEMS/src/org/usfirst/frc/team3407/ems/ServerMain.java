@@ -10,6 +10,9 @@ import com.thingworx.communications.client.ConnectedThingClient;
 import com.thingworx.communications.client.things.VirtualThing;
 
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
+import edu.wpi.first.wpilibj.tables.ITable;
+
+import org.usfirst.frc.team3407.ems.simulator.SimulatedTable;
 
 public class ServerMain extends ConnectedThingClient {
 
@@ -17,7 +20,7 @@ public class ServerMain extends ConnectedThingClient {
 	
 	private static final String TABLE_NAME = "RobotData";
 	
-	private static String APP_KEY = "5a788559-ff94-4f2e-8818-70e5072e3107";
+	private static String APP_KEY = System.getProperty("appKey");
 
 	public ServerMain(ClientConfigurator config) throws Exception {
 		super(config);
@@ -62,15 +65,16 @@ public class ServerMain extends ConnectedThingClient {
 				///////////////////////////////////////////////////////////////
 				
 				ArrayList<PropertyAccessor> accessors = new ArrayList<PropertyAccessor>();
-				accessors.add(new NumberPropertyAccessor("Yaw", 0.345));
-				accessors.add(new NumberPropertyAccessor("Solenoid A Counter", -1));
-				accessors.add(new NumberPropertyAccessor("Solenoid B Counter", -1));
-				accessors.add(new NumberPropertyAccessor("Solenoid X Counter", -1));
-				accessors.add(new NumberPropertyAccessor("Solenoid Y Counter", -1));
-				NetworkTable table = NetworkTable.getTable(TABLE_NAME);
-				LOG.debug("NetworkTable: connected=" + table.isConnected());
+				accessors.add(new NumberPropertyAccessor("Encoder", 0.345));
+				accessors.add(new NumberPropertyAccessor("Speed", -1));
+				accessors.add(new NumberPropertyAccessor("Error", -1));
+				
+				NetworkTable netTable = NetworkTable.getTable(TABLE_NAME);
+				LOG.debug("NetworkTable: connected=" + netTable.isConnected());
+				ITable table = netTable.isConnected() ? netTable : new SimulatedTable(1234);
+							
 				NetworkTableThing tableThing = new NetworkTableThing(TABLE_NAME, TABLE_NAME,
-						server, table.isConnected() ? table : new SimulatedTable(1234), accessors); 
+						server, table, accessors); 
 				server.bindThing(tableThing);
 				
 				// This will prevent the main thread from exiting. It will be up to another thread
