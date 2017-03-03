@@ -1,7 +1,7 @@
 package org.usfirst.frc.team3407.ems.simulator;
 
 import java.nio.ByteBuffer;
-import java.util.Random;
+import java.util.Map;
 import java.util.Set;
 
 import edu.wpi.first.wpilibj.tables.ITable;
@@ -10,15 +10,20 @@ import edu.wpi.first.wpilibj.tables.TableKeyNotDefinedException;
 
 public class SimulatedTable implements ITable {
 
-	private static final double NUMBER_BASE = -50d;
-	private static final double NUMBER_RANGE = 100;
+	private static final double DEFAULT_NUMBER_AVERAGE = 0.0;
+	private static final double DEFAULT_NUMBER_DELTA = 1.0;
 	
-	private Random random;
+	private SimulatedNumber numbers = new SimulatedNumber(DEFAULT_NUMBER_AVERAGE, 
+			DEFAULT_NUMBER_DELTA);
 	
-	public SimulatedTable(long seed) {
-		random = new Random(seed);
+	private Map<String,SimulatedNumber> numberMap;
+	
+	public SimulatedTable() {
 	}
 	
+	public SimulatedTable(Map<String,SimulatedNumber> numberMap) {
+		this.numberMap = numberMap;
+	}
 	
 	@Override
 	public boolean setDefaultNumber(String key, double defaultValue) {
@@ -193,14 +198,16 @@ public class SimulatedTable implements ITable {
 
 	@Override
 	public double getNumber(String key) throws TableKeyNotDefinedException {
-		// TODO Auto-generated method stub
-		return 0;
+		SimulatedNumber sim = (numberMap == null) ? null : numberMap.get(key);
+		if (sim == null) {
+			sim = numbers;
+		}
+		return sim.get();
 	}
 
 	@Override
-	public double getNumber(String key, double defaultValue) {
-		
-		return (random.nextDouble() * NUMBER_RANGE) + NUMBER_BASE;
+	public double getNumber(String key, double defaultValue) {		
+		return getNumber(key);
 	}
 
 	@Override

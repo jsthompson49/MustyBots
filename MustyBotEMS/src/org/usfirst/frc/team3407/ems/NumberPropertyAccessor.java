@@ -13,14 +13,18 @@ public class NumberPropertyAccessor extends PropertyAccessor {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(NumberPropertyAccessor.class);
 
-	private double defaultValue;
+	private Double defaultValue;
 	
-	public NumberPropertyAccessor(String name, double defaultValue) {
+	public NumberPropertyAccessor(String name) {
+		this(name, new Double(0.0));
+	}
+
+	public NumberPropertyAccessor(String name, Double defaultValue) {
 		this(name, name, defaultValue);
 	}
 	
 	public NumberPropertyAccessor(String name, String description,
-			double defaultValue) {
+			Double defaultValue) {
 		super(name, description);
 		this.defaultValue = defaultValue;
 	}

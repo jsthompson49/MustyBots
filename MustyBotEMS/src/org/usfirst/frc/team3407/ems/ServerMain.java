@@ -1,6 +1,7 @@
 package org.usfirst.frc.team3407.ems;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +13,7 @@ import com.thingworx.communications.client.things.VirtualThing;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 import edu.wpi.first.wpilibj.tables.ITable;
 
+import org.usfirst.frc.team3407.ems.simulator.SimulatedNumber;
 import org.usfirst.frc.team3407.ems.simulator.SimulatedTable;
 
 public class ServerMain extends ConnectedThingClient {
@@ -65,13 +67,23 @@ public class ServerMain extends ConnectedThingClient {
 				///////////////////////////////////////////////////////////////
 				
 				ArrayList<PropertyAccessor> accessors = new ArrayList<PropertyAccessor>();
-				accessors.add(new NumberPropertyAccessor("Encoder", 0.345));
-				accessors.add(new NumberPropertyAccessor("Speed", -1));
-				accessors.add(new NumberPropertyAccessor("Error", -1));
+				accessors.add(new NumberPropertyAccessor("Encoder"));
+				accessors.add(new NumberPropertyAccessor("Speed"));
+				accessors.add(new NumberPropertyAccessor("Error"));
 				
 				NetworkTable netTable = NetworkTable.getTable(TABLE_NAME);
 				LOG.debug("NetworkTable: connected=" + netTable.isConnected());
-				ITable table = netTable.isConnected() ? netTable : new SimulatedTable(1234);
+				ITable table;
+				if(netTable.isConnected()) {
+					table = netTable;
+				}
+				else {
+					HashMap<String,SimulatedNumber> map = new HashMap<String,SimulatedNumber>();
+					map.put("Encoder", new SimulatedNumber(1500, 50));
+					map.put("Speed", new SimulatedNumber(0.8, 0.04));
+					map.put("Error", new SimulatedNumber(0, 50));
+					table = new SimulatedTable(map);				
+				}
 							
 				NetworkTableThing tableThing = new NetworkTableThing(TABLE_NAME, TABLE_NAME,
 						server, table, accessors); 
