@@ -3,15 +3,19 @@ package org.usfirst.frc.team3407.vp;
 import java.io.File;
 import java.util.ArrayList;
 
+import edu.wpi.first.wpilibj.vision.VisionPipeline;
+
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
+import org.opencv.core.Point;
 import org.opencv.core.Rect;
-import org.opencv.imgcodecs.Imgcodecs;
-import org.opencv.imgproc.Imgproc;
+
+import org.usfirst.frc.team3407.robot.vision.BoilerEvaluator;
+import org.usfirst.frc.team3407.robot.vision.GripPipeline;
+import org.usfirst.frc.team3407.robot.vision.TargetEvaluator;
 
 import org.usfirst.frc.team3407.vision.BoilerPipeline;
-import org.usfirst.frc.team3407.vision.GripPipeline;
 
 public class Tester {
 	
@@ -19,13 +23,6 @@ public class Tester {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 	}
 
-	private static final int[][] BOILER_IMAGES = {
-			{ 4, 2 },
-			{ 10, 4 },
-			{ 12, 7 },
-			{ 11, 3 }
-	};
-	
 	public static void main(String[] args) {
 			    
 		String imageFileName = args[0];
@@ -33,66 +30,71 @@ public class Tester {
 		System.out.println("Vision Processing Tester");
 		System.out.println("Processing: " + imageFileName);
 
+		ImageSource source = null;
 		File file = new File(imageFileName);
-		if(file.exists()) {
-			if(file.isDirectory()) {
-				int angle = (args.length > 1) ? Integer.parseInt(args[1]) : 0;
-				int[] distances = BOILER_IMAGES[angle];
-				runImages(args[0], angle, distances[0], distances[1]);
-			}
-			else {
-				runImage(args[0]);
-			}
+		if(file.exists() && file.isDirectory()) {
+			int angle = (args.length > 1) ? Integer.parseInt(args[1]) : 0;
+			source = new Sample2017ImageSource(args[0], angle);
+		}
+		
+		if (source == null) {
+			//URL.
+			//source = image(args[0]);
+		}
+		
+		if (source == null) {
+			System.out.println("No input source for images");
+		}
+		
+		boolean robotVision = true;
+		if (robotVision) {
+			GripPipeline pipeline = new GripPipeline();
+			VisionPipelineAdapter pipelineOutput = new VisionPipelineAdapter(pipeline);		
+			processImages(source, pipeline, pipelineOutput, new BoilerEvaluator());
 		}
 		else {
-			System.out.println("File or directory does not exist");
+			BoilerPipeline pipeline = new BoilerPipeline();
+			processImages(source, pipeline, pipeline, new BoilerEvaluator());
 		}
 	}
 		  
-	public static void runImages(String imageFilesBaseDir, int angle, 
-			int farDistance, int closeDistance) {
+	public static void processImages(ImageSource source, VisionPipeline pipeline, VisionPipelineOutput pipelineOutput, 
+			TargetEvaluator targetEvaluator) {
+
+		while(source.hasNext()) {
+			Mat image = source.next();
+			pipeline.process(image);
+			ArrayList<MatOfPoint> contours = pipelineOutput.getContours();
+			boolean targetAcquired = targetEvaluator.process(contours);
+			System.out.println("Target acquired: " + targetAcquired);
 		
-		for(int d = farDistance;d >= closeDistance;d--) {
-			StringBuilder fileName = new StringBuilder();
-			fileName.append(imageFilesBaseDir).append("/Angle").append(angle);
-			fileName.append("/1ftH").append(d).append("ftD").append(angle);
-			fileName.append("Angle0Brightness.jpg");
-			
-			System.out.println("\nInput: " + fileName);
-			System.out.println("Distance=" + d);
-			runImage(fileName.toString());
-		}		
+			Rect target = targetEvaluator.getTarget();
+			if(target == null) {
+				System.out.println("No target identified");
+			}
+			else {
+				System.out.println("Target Rectangle: " + target + 
+						" targetArea=" + target.area() + 
+						" fromCenter=" + targetEvaluator.getTargetHorizontalOffset(new Point(image.width() / 2, image.height() / 2)));
+			}
+		}
 	}
 	
-	public static void runImage(String imageFileName) {
+	public interface VisionPipelineOutput {
+		public ArrayList<MatOfPoint> getContours();
+	}
+	
+	private static class VisionPipelineAdapter implements VisionPipelineOutput {
 
-		Mat image = Imgcodecs.imread(imageFileName);
-		System.out.println("width=" + image.width() + " height=" + image.height());
-
-		GripPipeline pipeline = new BoilerPipeline(image);
+		private GripPipeline pipeline;
 		
-		pipeline.processImage();
-		
-		//Imgcodecs.imwrite("C:\temp\test_hsl.jpeg", pipeline.hslThresholdOutput());
-				
-		ArrayList<MatOfPoint> contours = pipeline.filterContoursOutput();
-		int contourCount = contours.size();
-		System.out.println("Countours: count=" + contourCount);
-		
-		for(int i = 0;i < contourCount;i++) {
-			Rect rect = Imgproc.boundingRect(contours.get(i));
-			System.out.println("Bounding Rectange(" + i + ")=" + rect + " x=" + rect.x + 
-					" area=" + (rect.height * rect.width));
+		public VisionPipelineAdapter(GripPipeline pipeline) {
+			this.pipeline = pipeline;
 		}
-
-		Rect target = pipeline.getTarget();
-		if(target == null) {
-			System.out.println("No target identified");
-		}
-		else {
-			System.out.println("Target Rectangle: " + target + 
-					" targetArea=" + target.area() + 
-					" fromCenter=" + pipeline.getTargetPointFromCenter());
+		
+		@Override
+		public ArrayList<MatOfPoint> getContours() {			
+			return pipeline.filterContoursOutput();
 		}
 	}
 }

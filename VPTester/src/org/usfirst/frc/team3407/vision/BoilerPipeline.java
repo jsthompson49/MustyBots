@@ -2,7 +2,6 @@ package org.usfirst.frc.team3407.vision;
 
 import java.util.ArrayList;
 
-import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.Rect;
 import org.opencv.imgproc.Imgproc;
@@ -11,17 +10,13 @@ import org.opencv.imgproc.Imgproc;
  * GripPipeline for Boiler images.
  *
  */
-public class BoilerPipeline extends GripPipeline {
+public class BoilerPipeline extends VPGripPipeline {
 
 	private static final double HEIGHT_RATIO = 1.25d;
 
 	private static final int X_MATCH_THRESHOLD = 15;
 	private static final int WIDTH_MATCH_THRESHOLD = 15;
 	private static final double HEIGHT_RATIO_MATCH_THRESHOLD = 0.25d;
-
-	public BoilerPipeline(Mat source) {
-		super(source);
-	}
 
 	@Override
 	public Rect getTarget() {

@@ -6,11 +6,15 @@ import java.util.List;
 import org.opencv.core.*;
 import org.opencv.imgproc.*;
 
+import edu.wpi.first.wpilibj.vision.VisionPipeline;
+
+import org.usfirst.frc.team3407.vp.Tester;
+
 /**
 * GripPipeline class.
 *
 */
-public abstract class GripPipeline  {
+public abstract class VPGripPipeline implements VisionPipeline, Tester.VisionPipelineOutput  {
 
 	private Mat	source;
 	
@@ -52,12 +56,13 @@ public abstract class GripPipeline  {
 		return new double[] { 19.0, 155.0 };
 	}
 	
+	@Override
+	public ArrayList<MatOfPoint> getContours() {
+		return filterContoursOutput;
+	}
+
 	public abstract Rect getTarget();
 		
-	public GripPipeline(Mat source) {
-		this.source = source;
-	}
-	
 	public Point getTargetPointFromCenter() {
 		Point centerPoint = new Point(source.width() / 2, source.height() / 2);
 		Rect targetRect = getTarget();
@@ -70,7 +75,10 @@ public abstract class GripPipeline  {
 	/**
 	 * This is the primary method that runs the entire pipeline and updates the outputs.
 	 */
-	public void processImage() {
+	public void process(Mat image) {
+		
+		source = image;
+		
 		// Step HSL_Threshold0:
 		hslThreshold(source, getHslThresholdHue(), getHslThresholdSaturation(), getHslThresholdLuminance(), hslThresholdOutput);
 
