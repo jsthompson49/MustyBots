@@ -8,6 +8,10 @@ public class Sample2017ImageSource extends FileImageSource {
 			{ 12, 7 },
 			{ 11, 3 }
 	};
+
+	private static final int[][] PEG_IMAGES = {
+			{ 9, 1 },
+	};
 	
 	private String imageFilesBaseDir;
 	private int angle;
@@ -16,8 +20,14 @@ public class Sample2017ImageSource extends FileImageSource {
 	
 	public Sample2017ImageSource(String imageFilesBaseDir, int angle) {
 		this.imageFilesBaseDir = imageFilesBaseDir;
-		distance = BOILER_IMAGES[angle][0];
-		endDistance = BOILER_IMAGES[angle][1];
+		if(imageFilesBaseDir.endsWith("Boiler")) {
+			distance = BOILER_IMAGES[angle][0];
+			endDistance = BOILER_IMAGES[angle][1];
+		}
+		else {
+			distance = PEG_IMAGES[angle][0];
+			endDistance = PEG_IMAGES[angle][1];			
+		}
 	}
 	
 	@Override

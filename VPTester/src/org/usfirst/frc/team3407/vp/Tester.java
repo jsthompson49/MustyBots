@@ -13,8 +13,8 @@ import org.opencv.core.Rect;
 
 import org.usfirst.frc.team3407.robot.vision.BoilerEvaluator;
 import org.usfirst.frc.team3407.robot.vision.GripPipeline;
+import org.usfirst.frc.team3407.robot.vision.PegEvaluator;
 import org.usfirst.frc.team3407.robot.vision.TargetEvaluator;
-
 import org.usfirst.frc.team3407.vision.BoilerPipeline;
 
 public class Tester {
@@ -46,15 +46,17 @@ public class Tester {
 			System.out.println("No input source for images");
 		}
 		
+		TargetEvaluator targetEvaluator = imageFileName.endsWith("Boiler") ? new BoilerEvaluator() :
+				new PegEvaluator();
 		boolean robotVision = true;
 		if (robotVision) {
 			GripPipeline pipeline = new GripPipeline();
 			VisionPipelineAdapter pipelineOutput = new VisionPipelineAdapter(pipeline);		
-			processImages(source, pipeline, pipelineOutput, new BoilerEvaluator());
+			processImages(source, pipeline, pipelineOutput, targetEvaluator);
 		}
 		else {
 			BoilerPipeline pipeline = new BoilerPipeline();
-			processImages(source, pipeline, pipeline, new BoilerEvaluator());
+			processImages(source, pipeline, pipeline, targetEvaluator);
 		}
 	}
 		  
