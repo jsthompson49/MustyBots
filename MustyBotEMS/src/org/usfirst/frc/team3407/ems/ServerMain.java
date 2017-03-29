@@ -93,7 +93,7 @@ public class ServerMain extends ConnectedThingClient {
 				// of execution to call client.shutdown(), allowing this main thread to exit.
 				while (!server.isShutdown()) {
 					
-					Thread.sleep(1000);
+					//Thread.sleep(1000);
 					
 					// Every 1 seconds we tell the thing to process a scan request. This is
 					// an opportunity for the thing to query a data source, update property

@@ -13,7 +13,11 @@ import com.thingworx.types.primitives.StringPrimitive;
 
 import edu.wpi.first.wpilibj.tables.ITable;
 
+import org.joda.time.DateTime;
+
 public abstract class PropertyAccessor {
+	
+	//private static int counter = 0;
 	
 	private String name;
 	private String propertyName;
@@ -43,6 +47,12 @@ public abstract class PropertyAccessor {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+	
+	public DateTime getTimestamp() {
+		//counter++;
+		//return new DateTime(2017, 12, 25, (counter / 3600000) % 24, (counter /60000) % 60, (counter /1000) % 60, counter % 1000);
+		return new DateTime();
 	}
 
 	public abstract BaseTypes getType();

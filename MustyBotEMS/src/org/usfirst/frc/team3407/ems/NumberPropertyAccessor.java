@@ -1,11 +1,14 @@
 package org.usfirst.frc.team3407.ems;
 
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.thingworx.communications.client.things.VirtualThing;
 import com.thingworx.types.BaseTypes;
 import com.thingworx.types.primitives.NumberPrimitive;
+import com.thingworx.types.primitives.structs.VTQ;
+import com.thingworx.types.constants.QualityStatus;
 
 import edu.wpi.first.wpilibj.tables.ITable;
 
@@ -43,7 +46,9 @@ public class NumberPropertyAccessor extends PropertyAccessor {
 		if(LOGGER.isInfoEnabled()) {
 			LOGGER.debug("updateProperty() name=" + name + " value=" + value);
 		}
+		
+		VTQ thingValue = new VTQ(new NumberPrimitive(value), getTimestamp(), QualityStatus.GOOD);
 
-		thing.setPropertyValue(getPropertyName(), new NumberPrimitive(value));		
+		thing.setPropertyVTQ(getPropertyName(), thingValue, true /* force */);		
 	}
 }
