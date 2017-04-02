@@ -20,7 +20,8 @@ public class ServerMain extends ConnectedThingClient {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ServerMain.class);
 	
-	private static final String TABLE_NAME = "RobotData";
+	private static final String THING_NAME = "RobotData";
+	private static final String TABLE_NAME = "SmartDashboard/DB";
 	
 	private static String APP_KEY = System.getProperty("appKey");
 
@@ -47,7 +48,7 @@ public class ServerMain extends ConnectedThingClient {
 		
 		// Implicilty sets IP address and 
 		NetworkTable.setTeam(3407);
-
+		
 		try {
 			
 			// Create our client.
@@ -66,16 +67,29 @@ public class ServerMain extends ConnectedThingClient {
 				// Create a VirtualThing and bind it to the client
 				///////////////////////////////////////////////////////////////
 				
+				HashMap<String,String> tableStringMap = new HashMap<String,String>();
+				tableStringMap.put("Encoder", "String 7");
+				tableStringMap.put("Speed", "String 9");
+				tableStringMap.put("Error", "String 8");
+
 				ArrayList<PropertyAccessor> accessors = new ArrayList<PropertyAccessor>();
 				accessors.add(new NumberPropertyAccessor("Encoder"));
 				accessors.add(new NumberPropertyAccessor("Speed"));
 				accessors.add(new NumberPropertyAccessor("Error"));
+				for(PropertyAccessor accessor : accessors) {
+					accessor.setTableStringMap(tableStringMap);
+				}
 				
-				NetworkTable netTable = NetworkTable.getTable(TABLE_NAME);
-				LOG.debug("NetworkTable: connected=" + netTable.isConnected());
+				NetworkTable netTable = NetworkTable.getTable("SmartDashboard");
+
+				// Wait for communication
+				Thread.sleep(4000);
+				
+				LOG.debug("NetworkTable: name=" + netTable + " connected=" + netTable.isConnected());
 				ITable table;
 				if(netTable.isConnected()) {
-					table = netTable;
+					table = netTable.getSubTable("DB");
+					LOG.debug("NetworkTable: name=" + table);
 				}
 				else {
 					HashMap<String,SimulatedNumber> map = new HashMap<String,SimulatedNumber>();
@@ -85,7 +99,7 @@ public class ServerMain extends ConnectedThingClient {
 					table = new SimulatedTable(map);				
 				}
 							
-				NetworkTableThing tableThing = new NetworkTableThing(TABLE_NAME, TABLE_NAME,
+				NetworkTableThing tableThing = new NetworkTableThing(THING_NAME, THING_NAME,
 						server, table, accessors); 
 				server.bindThing(tableThing);
 				

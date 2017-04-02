@@ -13,6 +13,8 @@ import com.thingworx.types.primitives.StringPrimitive;
 
 import edu.wpi.first.wpilibj.tables.ITable;
 
+import java.util.Map;
+
 import org.joda.time.DateTime;
 
 public abstract class PropertyAccessor {
@@ -22,6 +24,8 @@ public abstract class PropertyAccessor {
 	private String name;
 	private String propertyName;
 	private String description;
+	
+	private Map<String,String> tableStringMap = null;
 	
 	public PropertyAccessor(String name, String description) {
 		this.name = name;
@@ -55,6 +59,21 @@ public abstract class PropertyAccessor {
 		return new DateTime();
 	}
 
+	public Map<String,String> getTableStringMap() {
+		return tableStringMap;
+	}
+	
+	public void setTableStringMap(Map<String,String> map) {
+		this.tableStringMap = map;
+	}
+
+	protected String getMappedValue(ITable table, String defaultValue) {
+		Map<String,String> map = getTableStringMap();
+		String mappedName = (map == null) ? null : map.get(name);
+		
+		return (mappedName == null) ? defaultValue : table.getString(name, defaultValue);
+	}
+		
 	public abstract BaseTypes getType();
 	public abstract void updateProperty(ITable table, VirtualThing thing) 
 			throws Exception;

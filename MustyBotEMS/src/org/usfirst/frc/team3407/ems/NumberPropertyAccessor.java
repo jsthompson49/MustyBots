@@ -42,7 +42,14 @@ public class NumberPropertyAccessor extends PropertyAccessor {
 
 		final String name = getName();
 		
-		Double value = table.getNumber(name, defaultValue);
+		Double value = null;
+		if(table.containsKey(name)) {
+			value = table.getNumber(name, defaultValue);
+		}
+		else {
+			String sValue = getMappedValue(table, Double.toString(defaultValue));
+			value = (sValue == null) ? defaultValue : Double.parseDouble(sValue);
+		}
 		if(LOGGER.isInfoEnabled()) {
 			LOGGER.debug("updateProperty() name=" + name + " value=" + value);
 		}
